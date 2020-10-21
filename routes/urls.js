@@ -91,7 +91,7 @@ router.post("/registerBulk", async (req, res) => {
             clickCount: 0,
           });
           
-         await url.save();
+        await url.save();
           url_success.push(url);
         }else{
           url_repeat.push(urlExists)
@@ -104,31 +104,7 @@ router.post("/registerBulk", async (req, res) => {
       }
       
   }
-//   req.body.longUrls.forEach((item) => {
-//     if (validUrl.isUri(item)) {
-//       var urlExists = Url.findOne({ longUrl: item });
-//       if (!urlExists) {
-//         const urlCode = shortid.generate();
-//         const shortUrl = process.env.baseUrl + "/" + urlCode;
-//         url = new Url({
-//           urlCode,
-//           longUrl: item,
-//           shortUrl,
-//           clickCount: 0,
-//         });
-//         url_success.push(url);
-//         url.save();
-//       }else{
-//         // url_repeat.push(urlExists)
-//         // console.log(urlExists)
-        
-//       }
-//     } else {
-//       console.log("no es una url " + item);
-//       url_error.push(item);
-//     }
-//   });
-  // const urls =  req.body.longUrls;
+
   return res.status(200).json({ "accepteds": url_success, 
     "rejected": url_error,
     "repeats":url_repeat });
