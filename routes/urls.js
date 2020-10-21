@@ -10,10 +10,11 @@ const schemaRegister = Joi.object({
     longUrl: Joi.string().min(6).max(255).required(),
 }) 
 
-const schemaRegisterBulk = Joi.object({
-    longUrls:Joi.array().items(Joi.string().min(6).max(255).required())
-
-})
+const schema = Joi.object(
+    {
+        longUrls:Joi.array().min(3).max(100).items(Joi.string().min(6).max(255).required())
+    }
+)
 
 const clicks = 10;
 router.post("/register", async (req,res)=>{
@@ -80,7 +81,30 @@ router.get('/:redirectUrl', async(req,res)=>{
 
 router.post('/registerBulk',async(req,res)=>{
 
-    const {error} = schemaRegister.validate()
+    const {error} = schema.validate(req.body)
+    if (error) {
+        return res.status(400).json({error:error.details[0].message})
+        
+    }
+
+    req.body.longUrls.forEach(item => {
+
+        if (validUrl.isUri(item)) {
+            const urlCode = shortid.generate();
+            const shortUrl = process.env.baseUrl + "/" + urlCode;
+            url  = new Url({
+                urlCode,
+                longUrl:item,
+                shortUrl,
+                clickCount:0
+            });
+            url.save();
+        }else{
+            console.log("no es una url "+item)
+        }
+    });
+    // const urls =  req.body.longUrls;
+    return res.status(200).json({"message":"hola"})
 });
 
 
