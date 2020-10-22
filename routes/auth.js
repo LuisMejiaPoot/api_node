@@ -18,14 +18,14 @@ const jwt = require('jsonwebtoken');
 
 router.post('/login',async(req,res)=>{
     const {error} = shemaLogin.validate(req.body);
-    if (error) return res.status(400).json({error:error.details[0].message})
+    if (error) return res.status(400).json({error:true,message:error.details[0].message})
     
     const user =  await User.findOne({email:req.body.email});
-    if (!user)  return res.status(400).json({error:'Usuario no encontrado'})
+    if (!user)  return res.status(400).json({error:true,message:'Invalid credentials'})
     
 
     const validPassword = await bcrypt.compare(req.body.password,user.password);
-    if (!validPassword) return res.status(400).json({error:"password invalido"});
+    if (!validPassword) return res.status(400).json({error:true,message:'Invalid credentials'});
 
 
     const token = jwt.sign({
@@ -44,7 +44,7 @@ router.post('/register',async (req,res) => {
 
     const {error}  =  schemaRegister.validate(req.body);
     if (error) {
-        return res.status(400).json({error: error.details[0].message})
+        return res.status(400).json({error:true,message:error.details[0].message})
     }
 
     //validar el email
@@ -53,7 +53,8 @@ router.post('/register',async (req,res) => {
 
     if (isEmailExist) {
         return res.status(400).json({
-            error:"El email ya existe"
+            error:true,
+            message:"This email has already been registered"
         })
     }
 
@@ -73,7 +74,7 @@ router.post('/register',async (req,res) => {
             "data":userDB
         })
     } catch (error) {
-        res.status(400).json(error);
+        res.status(400).json({error:true,message:error});
     }
 
 });

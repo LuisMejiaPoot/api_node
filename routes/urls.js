@@ -12,8 +12,8 @@ const schemaRegister = Joi.object({
 
 const schema = Joi.object({
   longUrls: Joi.array()
-    .min(3)
-    .max(100)
+    .min(2)
+    .max(1000)
     .items(Joi.string().min(6).max(255).required()),
 });
 
@@ -21,7 +21,7 @@ const clicks = 10;
 router.post("/register", async (req, res) => {
   const { error } = schemaRegister.validate(req.body);
   if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+    return res.status(400).json({ error: true, message:error.details[0].message });
   }
   const longUrl = req.body.longUrl;
   const urlCode = shortid.generate();
@@ -31,7 +31,7 @@ router.post("/register", async (req, res) => {
       var url = await Url.findOne({ longUrl: longUrl });
 
       if (url) {
-        return res.status(200).json({error:null,url,data:{user:req.user}});
+        return res.status(200).json({error:null,url,data:{user:req.user},message:"This url has been registered before"});
       } else {
         // return res.status(200).json(process.env.baseUrl)
         const shortUrl = process.env.BASEURL + "/" + urlCode;
@@ -43,14 +43,14 @@ router.post("/register", async (req, res) => {
         });
         await url.save();
         return res.status(201).json({error:null,url,data:{
-          user:req.user}});
+          user:req.user},message:"Url registered success"});
       }
     } catch (err) {
       console.error(err.message);
       return res.status(500).json("Internal Serve error " + err.message);
     }
   } else {
-    return res.status(200).json("Error de url");
+    return res.status(200).json({error:true,message:"url don't have a correct format"});
   }
 });
 
@@ -58,7 +58,7 @@ router.post("/register", async (req, res) => {
 router.post("/registerBulk", async (req, res) => {
   const { error } = schema.validate(req.body);
   if (error) {
-    return res.status(400).json({ error: error.details[0].message });
+    return res.status(400).json({ error: true,message:error.details[0].message });
   }
   const url_success = [];
   const url_error = [];
@@ -81,11 +81,10 @@ router.post("/registerBulk", async (req, res) => {
           url_success.push(url);
         }else{
           url_repeat.push(urlExists)
-          // console.log(urlExists)
+          
           
         }
       } else {
-        console.log("no es una url " + item);
         url_error.push(item);
       }
       
@@ -93,7 +92,7 @@ router.post("/registerBulk", async (req, res) => {
 
   return res.status(200).json({ "accepteds": url_success, 
     "rejected": url_error,
-    "repeats":url_repeat });
+    "repeats":url_repeat,error:null });
 });
 
 module.exports = router;
