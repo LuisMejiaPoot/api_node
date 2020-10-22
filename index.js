@@ -28,9 +28,9 @@ const urlRoutes = require('./routes/urls');
 app.use('/api/user',authRoutes);
 app.use('/api/url',validToken,urlRoutes);
 
-app.get('/', (req, res) => {
+app.get('/', async(req, res) => {
     try {
-        const user =  await User.findOne({email:req.body.email});
+        const user =  await User.findOne({email:"pruebas_heroku@gmail.com"});
         res.json({
             estado: true,
             mensaje: 'funciona!',
