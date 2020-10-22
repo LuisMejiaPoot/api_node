@@ -29,10 +29,18 @@ app.use('/api/user',authRoutes);
 app.use('/api/url',validToken,urlRoutes);
 
 app.get('/', (req, res) => {
-    res.json({
-        estado: true,
-        mensaje: 'funciona!'
-    })
+    try {
+        const user =  await User.findOne({email:req.body.email});
+        res.json({
+            estado: true,
+            mensaje: 'funciona!',
+            user
+        })
+        
+    } catch (error) {
+        res.json(error)
+    }
+
 });
 
 // iniciar server
