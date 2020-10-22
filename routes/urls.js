@@ -34,7 +34,7 @@ router.post("/register", async (req, res) => {
         return res.status(200).json(url);
       } else {
         // return res.status(200).json(process.env.baseUrl)
-        const shortUrl = process.env.baseUrl + "/" + urlCode;
+        const shortUrl = process.env.BASEURL + "/" + urlCode;
         url = new Url({
           urlCode,
           longUrl,
@@ -83,7 +83,7 @@ router.post("/registerBulk", async (req, res) => {
         var urlExists = await Url.findOne({ longUrl: item });
         if (!urlExists) {
           const urlCode = shortid.generate();
-          const shortUrl = process.env.baseUrl + "/" + urlCode;
+          const shortUrl = process.env.BASEURL + "/" + urlCode;
           url = new Url({
             urlCode,
             longUrl: item,
