@@ -42,7 +42,7 @@ router.post("/register", async (req, res) => {
           clickCount: 0,
         });
         await url.save();
-        return res.status(201).json(url);
+        return res.status(201).json({error:null,url,data:{user:req.user.id}});
       }
     } catch (err) {
       console.error(err.message);

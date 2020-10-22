@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyparser = require('body-parser');
+const validToken = require('./middleware/validate-token')
 require('dotenv').config()
 
 const connectDB  = require('./config/db')
@@ -21,7 +22,7 @@ const urlRoutes = require('./routes/urls');
 // route middlewares
 
 app.use('/api/user',authRoutes);
-app.use('/api/url',urlRoutes);
+app.use('/api/url',validToken,urlRoutes);
 
 app.get('/', (req, res) => {
     res.json({
