@@ -5,6 +5,7 @@ const validToken = require('./middleware/validate-token')
 require('dotenv').config()
 
 const connectDB  = require('./config/db')
+const configCore = require('./config/core')
 const app = express();
 
 // capturar body
@@ -15,6 +16,9 @@ app.use(bodyparser.json());
 // Conexión a Base de datos
 
 connectDB();
+configCore(app);
+
+
 
 // import routes
 const authRoutes = require('./routes/auth');
