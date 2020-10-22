@@ -31,7 +31,7 @@ router.post("/register", async (req, res) => {
       var url = await Url.findOne({ longUrl: longUrl });
 
       if (url) {
-        return res.status(200).json(url);
+        return res.status(200).json({error:null,url,data:{user:req.user}});
       } else {
         // return res.status(200).json(process.env.baseUrl)
         const shortUrl = process.env.BASEURL + "/" + urlCode;
@@ -42,7 +42,8 @@ router.post("/register", async (req, res) => {
           clickCount: 0,
         });
         await url.save();
-        return res.status(201).json({error:null,url,data:{user:req.user.id}});
+        return res.status(201).json({error:null,url,data:{
+          user:req.user}});
       }
     } catch (err) {
       console.error(err.message);
@@ -53,21 +54,6 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.get("/:redirectUrl", async (req, res) => {
-  const redirectUrl = req.params.redirectUrl;
-  const url = await Url.findOne({ urlCode: redirectUrl });
-
-  if (!url) {
-    return res.status(200).json({
-      error: true,
-      message: "the url does not exist",
-    });
-  }
-  var clickCount = url.clickCount;
-  clickCount++;
-  await url.update({ clickCount });
-  return res.redirect(url.longUrl);
-});
 
 router.post("/registerBulk", async (req, res) => {
   const { error } = schema.validate(req.body);

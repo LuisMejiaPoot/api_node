@@ -23,23 +23,21 @@ configCore(app);
 // import routes
 const authRoutes = require('./routes/auth');
 const urlRoutes = require('./routes/urls');
+const redirectAction =  require('./routes/redirect')
 // route middlewares
 
 app.use('/api/user',authRoutes);
 app.use('/api/url',validToken,urlRoutes);
+app.use('/',redirectAction)
 
-app.get('/', async(req, res) => {
-    try {
-        const user =  await User.findOne({email:"pruebas_heroku@gmail.com"});
+app.get('/', (req, res) => {
+
         res.json({
             estado: true,
-            mensaje: 'funciona!',
-            user
+            mensaje: 'funciona!'
         })
         
-    } catch (error) {
-        res.json(error)
-    }
+  
 
 });
 
