@@ -95,4 +95,20 @@ router.post("/registerBulk", async (req, res) => {
     "repeats":url_repeat,error:null });
 });
 
+router.post("/allUrl",async(req,res)=>{
+  const urls =  await Url.find({},function (err,data) {
+    if (err) {
+      return res.status(400).json({
+        error:true,
+        message:err
+      })
+    }
+  })
+  if (urls.length == 0) {
+    return res.status(200).json({error:false,message:"Not found registers"})
+  }
+
+  return res.status(200).json({error:false,datos:urls})
+})
+
 module.exports = router;
