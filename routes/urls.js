@@ -44,7 +44,7 @@ router.post("/register", async (req, res) => {
         return res
           .status(200)
           .json({
-            error: null,
+            error: "repeat",
             url,
             data: { user: req.user },
             message: "This url has been registered before",
