@@ -5,6 +5,7 @@ const Url = require("../models/Url");
 require("dotenv").config();
 
 const Joi = require("@hapi/joi");
+const { valid } = require("@hapi/joi");
 
 const schemaRegister = Joi.object({
   longUrl: Joi.string().min(6).max(255).required(),
@@ -41,14 +42,12 @@ router.post("/register", async (req, res) => {
       var url = await Url.findOne({ longUrl: longUrl });
 
       if (url) {
-        return res
-          .status(200)
-          .json({
-            error: "repeat",
-            url,
-            data: { user: req.user },
-            message: "This url has been registered before",
-          });
+        return res.status(200).json({
+          error: "repeat",
+          url,
+          data: { user: req.user },
+          message: "This url has been registered before",
+        });
       } else {
         // return res.status(200).json(process.env.baseUrl)
         const shortUrl = process.env.BASEURL + "/" + urlCode;
@@ -113,14 +112,12 @@ router.post("/registerBulk", async (req, res) => {
     }
   }
 
-  return res
-    .status(200)
-    .json({
-      accepteds: url_success,
-      rejected: url_error,
-      repeats: url_repeat,
-      error: null,
-    });
+  return res.status(200).json({
+    accepteds: url_success,
+    rejected: url_error,
+    repeats: url_repeat,
+    error: null,
+  });
 });
 
 router.post("/allUrl", async (req, res) => {
@@ -157,7 +154,7 @@ router.post("/deleteUrl", async (req, res) => {
       });
     }
   });
-// coment
+  // coment
   if (!findUrl) {
     return res.status(400).json({ error: true, message: "Not found Url" });
   }
@@ -194,13 +191,13 @@ router.put("/updateUrl", async (req, res) => {
     data
   ) {
     if (err)
-      return res
-        .status(400)
-        .json({
-          error: true,
-          message: "Error al querer validar si existe la url",
-        });
+      return res.status(400).json({
+        error: true,
+        message: "Error al querer validar si existe la url",
+      });
   });
+  if (validExist === null)
+    return res.status(400).json({ error: true, message: "Url not exist" });
   if (validExist._id != req.body.id) {
     return res
       .status(200)
@@ -213,7 +210,7 @@ router.put("/updateUrl", async (req, res) => {
       if (err) return res.status(400).json({ error: true, message: err });
     }
   );
-  return res.status(200).json(updateUrl)
+  return res.status(200).json(updateUrl);
 });
 
 module.exports = router;
