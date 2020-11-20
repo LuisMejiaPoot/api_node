@@ -26,26 +26,33 @@ const shemaUpdate = Joi.object({
   url: Joi.string().min(10).max(150).required(),
 });
 
+
+
 const clicks = 10;
 router.post("/register", async (req, res) => {
   const { error } = schemaRegister.validate(req.body);
   if (error) {
-    return res
-      .status(400)
-      .json({ error: true, message: error.details[0].message });
+    return res.status(400).json({
+      error: true,
+      message: error.details[0].message,
+    });
   }
   const longUrl = req.body.longUrl;
   const urlCode = shortid.generate();
 
   if (validUrl.isUri(longUrl)) {
     try {
-      var url = await Url.findOne({ longUrl: longUrl });
+      var url = await Url.findOne({
+        longUrl: longUrl,
+      });
 
       if (url) {
         return res.status(200).json({
           error: "repeat",
           url,
-          data: { user: req.user },
+          data: {
+            user: req.user,
+          },
           message: "This url has been registered before",
         });
       } else {
@@ -72,18 +79,20 @@ router.post("/register", async (req, res) => {
       return res.status(500).json("Internal Serve error " + err.message);
     }
   } else {
-    return res
-      .status(200)
-      .json({ error: true, message: "url don't have a correct format" });
+    return res.status(200).json({
+      error: true,
+      message: "url don't have a correct format",
+    });
   }
 });
 
 router.post("/registerBulk", async (req, res) => {
   const { error } = schema.validate(req.body);
   if (error) {
-    return res
-      .status(400)
-      .json({ error: true, message: error.details[0].message });
+    return res.status(400).json({
+      error: true,
+      message: error.details[0].message,
+    });
   }
   const url_success = [];
   const url_error = [];
@@ -130,21 +139,26 @@ router.post("/allUrl", async (req, res) => {
     }
   });
   if (urls.length == 0) {
-    return res
-      .status(200)
-      .json({ error: false, message: "Not found registers" });
+    return res.status(200).json({
+      error: false,
+      message: "Not found registers",
+    });
   }
 
-  return res.status(200).json({ error: false, datos: urls });
+  return res.status(200).json({
+    error: false,
+    datos: urls,
+  });
 });
 
 router.post("/deleteUrl", async (req, res) => {
   const { error } = shemaDelete.validate(req.body);
 
   if (error)
-    return res
-      .status(400)
-      .json({ error: true, message: error.details[0].message });
+    return res.status(400).json({
+      error: true,
+      message: error.details[0].message,
+    });
 
   const findUrl = await Url.findById(req.body.id, function (err, data) {
     if (err) {
@@ -156,61 +170,96 @@ router.post("/deleteUrl", async (req, res) => {
   });
   // coment
   if (!findUrl) {
-    return res.status(400).json({ error: true, message: "Not found Url" });
+    return res.status(400).json({
+      error: true,
+      message: "Not found Url",
+    });
   }
-  const deleteU = await Url.deleteOne({ _id: req.body.id }, function (
-    err,
-    data
-  ) {
-    if (err) {
-      return res.status(400).json({
-        error: true,
-        message: err,
-      });
+  const deleteU = await Url.deleteOne(
+    {
+      _id: req.body.id,
+    },
+    function (err, data) {
+      if (err) {
+        return res.status(400).json({
+          error: true,
+          message: err,
+        });
+      }
     }
-  });
+  );
 
-  return res.status(200).json({ error: false, message: "The Url was deleted" });
+  return res.status(200).json({
+    error: false,
+    message: "The Url was deleted",
+  });
 });
 
 router.put("/updateUrl", async (req, res) => {
   const { error } = shemaUpdate.validate(req.body);
   if (error)
-    return res
-      .status(400)
-      .json({ error: true, message: error.details[0].message });
+    return res.status(400).json({
+      error: true,
+      message: error.details[0].message,
+    });
 
   if (!validUrl.isUri(req.body.url)) {
-    return res
-      .status(400)
-      .json({ error: true, message: "Incorrect format from url" });
+    return res.status(400).json({
+      error: true,
+      message: "Incorrect format from url",
+    });
   }
 
-  const validExist = await Url.findOne({ longUrl: req.body.url }, function (
-    err,
-    data
-  ) {
-    if (err)
-      return res.status(400).json({
-        error: true,
-        message: "Error al querer validar si existe la url",
-      });
-  });
+  const validExist = await Url.findOne(
+    {
+      longUrl: req.body.url,
+    },
+    function (err, data) {
+      if (err)
+        return res.status(400).json({
+          error: true,
+          message: "Error al querer validar si existe la url",
+        });
+    }
+  );
   if (validExist === null)
-    return res.status(400).json({ error: true, message: "Url not exist" });
+    return res.status(400).json({
+      error: true,
+      message: "Url not exist",
+    });
   if (validExist._id != req.body.id) {
-    return res
-      .status(200)
-      .json({ error: true, message: "The url  has already been registred" });
+    return res.status(200).json({
+      error: true,
+      message: "The url  has already been registred",
+    });
   }
   const updateUrl = await Url.findByIdAndUpdate(
     { _id: req.body.id },
     { longUrl: req.body.url },
     function (err, data) {
-      if (err) return res.status(400).json({ error: true, message: err });
+      if (err)
+        return res.status(400).json({
+          error: true,
+          message: err,
+        });
     }
   );
   return res.status(200).json(updateUrl);
+});
+
+router.post("/getUrl", async (req, res) => {
+
+  const { error } = shemaDelete.validate(req.body);
+
+  if (error)
+    return res.status(400).json({error:true,message:error.details[0].message})
+
+  const url  =  await Url.findOne({_id:req.body.id},function(err,data) {
+      if(err) return res.status(400).json({error:true,message:"Error al obtener la url"})
+  })
+
+  return res.status(200).json({error:false,data:url})
+
 });
 
 module.exports = router;
