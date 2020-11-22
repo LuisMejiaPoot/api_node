@@ -2,10 +2,18 @@ const router = require("express").Router();
 const shortid = require("shortid");
 const validUrl = require("valid-url");
 const Url = require("../models/Url");
+const jwt = require('jsonwebtoken');
+
 require("dotenv").config();
 
+
 const Joi = require("@hapi/joi");
-const { valid } = require("@hapi/joi");
+const {
+  valid
+} = require("@hapi/joi");
+const {
+  response
+} = require("express");
 
 const schemaRegister = Joi.object({
   longUrl: Joi.string().min(6).max(255).required(),
@@ -30,7 +38,7 @@ const shemaUpdate = Joi.object({
 
 const clicks = 10;
 router.post("/register", async (req, res) => {
-  const { error } = schemaRegister.validate(req.body);
+  const {error} = schemaRegister.validate(req.body);
   if (error) {
     return res.status(400).json({
       error: true,
@@ -58,19 +66,12 @@ router.post("/register", async (req, res) => {
       } else {
         // return res.status(200).json(process.env.baseUrl)
         const shortUrl = process.env.BASEURL + "/" + urlCode;
-        url = new Url({
-          urlCode,
-          longUrl,
-          shortUrl,
-          clickCount: 0,
-        });
+        url = new Url({urlCode,longUrl,shortUrl,clickCount: 0,});
         await url.save();
         return res.status(201).json({
           error: null,
           url,
-          data: {
-            user: req.user,
-          },
+          data: {user: req.user},
           message: "Url registered success",
         });
       }
@@ -87,7 +88,9 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/registerBulk", async (req, res) => {
-  const { error } = schema.validate(req.body);
+  const {
+    error
+  } = schema.validate(req.body);
   if (error) {
     return res.status(400).json({
       error: true,
@@ -100,7 +103,9 @@ router.post("/registerBulk", async (req, res) => {
   for (let i = 0; i < req.body.longUrls.length; i++) {
     const item = req.body.longUrls[i];
     if (validUrl.isUri(item)) {
-      var urlExists = await Url.findOne({ longUrl: item });
+      var urlExists = await Url.findOne({
+        longUrl: item
+      });
       if (!urlExists) {
         const urlCode = shortid.generate();
         const shortUrl = process.env.BASEURL + "/" + urlCode;
@@ -152,7 +157,9 @@ router.post("/allUrl", async (req, res) => {
 });
 
 router.post("/deleteUrl", async (req, res) => {
-  const { error } = shemaDelete.validate(req.body);
+  const {
+    error
+  } = shemaDelete.validate(req.body);
 
   if (error)
     return res.status(400).json({
@@ -175,8 +182,7 @@ router.post("/deleteUrl", async (req, res) => {
       message: "Not found Url",
     });
   }
-  const deleteU = await Url.deleteOne(
-    {
+  const deleteU = await Url.deleteOne({
       _id: req.body.id,
     },
     function (err, data) {
@@ -196,7 +202,9 @@ router.post("/deleteUrl", async (req, res) => {
 });
 
 router.put("/updateUrl", async (req, res) => {
-  const { error } = shemaUpdate.validate(req.body);
+  const {error} = shemaUpdate.validate(req.body);
+  const token  =  req.header('auth-token')
+  const reverseToken =jwt.decode(token)
   if (error)
     return res.status(400).json({
       error: true,
@@ -210,9 +218,9 @@ router.put("/updateUrl", async (req, res) => {
     });
   }
 
-  const validExist = await Url.findOne(
-    {
-      longUrl: req.body.url,
+  const validExist = await Url.findOne({
+    longUrl : req.body.url,
+      _id: {"$ne":req.body.id}
     },
     function (err, data) {
       if (err)
@@ -220,22 +228,21 @@ router.put("/updateUrl", async (req, res) => {
           error: true,
           message: "Error al querer validar si existe la url",
         });
+      // return res.send(data)
     }
   );
-  if (validExist === null)
+  // User.find({ "groups": { "$nin": ['admin', 'user'] } })
+ 
+  if (validExist !== null)
     return res.status(400).json({
       error: true,
-      message: "Url not exist",
+      message: "Url longer exists",
     });
-  if (validExist._id != req.body.id) {
-    return res.status(200).json({
-      error: true,
-      message: "The url  has already been registred",
-    });
-  }
-  const updateUrl = await Url.findByIdAndUpdate(
-    { _id: req.body.id },
-    { longUrl: req.body.url },
+
+
+
+  const updateUrl = await Url.findByIdAndUpdate({
+      _id: req.body.id}, {longUrl: req.body.url},
     function (err, data) {
       if (err)
         return res.status(400).json({
@@ -244,21 +251,36 @@ router.put("/updateUrl", async (req, res) => {
         });
     }
   );
-  return res.status(200).json(updateUrl);
+  
+  
+  return res.status(200).json({error:false,data:updateUrl});
 });
 
 router.post("/getUrl", async (req, res) => {
 
-  const { error } = shemaDelete.validate(req.body);
+  const {
+    error
+  } = shemaDelete.validate(req.body);
 
   if (error)
-    return res.status(400).json({error:true,message:error.details[0].message})
+    return res.status(400).json({
+      error: true,
+      message: error.details[0].message
+    })
 
-  const url  =  await Url.findOne({_id:req.body.id},function(err,data) {
-      if(err) return res.status(400).json({error:true,message:"Error al obtener la url"})
+  const url = await Url.findOne({
+    _id: req.body.id
+  }, function (err, data) {
+    if (err) return res.status(400).json({
+      error: true,
+      message: "Error al obtener la url"
+    })
   })
 
-  return res.status(200).json({error:false,data:url})
+  return res.status(200).json({
+    error: false,
+    data: url
+  })
 
 });
 
